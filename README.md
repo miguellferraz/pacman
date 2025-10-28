@@ -8,10 +8,10 @@ O objetivo principal é demonstrar a compreensão dos conceitos de maximização
 
 ## 👨‍💻 Participantes
 
-| Miguel Carneiro Lira Ferraz | 22401150 |
-| Rafael Pinatto Lahr | 22400897 |
-| Samuel Pereira Lima | 22402066 |
-| Lucas Vilas Boas | 2240 |
+* **Miguel Carneiro Lira Ferraz** | Matrícula: 22401150
+* **Rafael Pinatto Lahr** | Matrícula: 22400897
+* **Samuel Pereira Lima** | Matrícula: 22402066
+* **Lucas Vilas Boas** | Matrícula: 2240
 
 ---
 
