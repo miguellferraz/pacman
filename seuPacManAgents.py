@@ -10,95 +10,87 @@ from multiAgents import MultiAgentSearchAgent
 class MinimaxAgent(MultiAgentSearchAgent):
     def getAction(self, gameState: GameState):
         """
-        Calcula a melhor ação para o Pac-Man (agente 0) usando o algoritmo Minimax.
-        A função retorna a ação, enquanto a função aninhada 'minimax' retorna o valor (score).
+        Método principal que inicia a busca Minimax.
+        Retorna a melhor AÇÃO do Pac-Man (Agente 0) no estado atual.
         """
 
         def minimax(state, agentIndex, depth):
-            # 1. Condição de Parada (Base Case)
-            # O algoritmo para se o jogo terminou (vitória/derrota) ou se a profundidade máxima foi atingida.
-            # O valor do estado é retornado usando a função de avaliação.
+            # 1. CONDIÇÃO DE PARADA (Nó Terminal/Folha)
+            # A recursão para se o jogo acabou (Vitória/Derrota) ou se a profundidade máxima foi alcançada.
+            # Nesses casos, o valor da heurística (função de avaliação) é retornado.
             if state.isWin() or state.isLose() or depth == self.depth:
-                return self.evaluationFunction(state) # [cite: 223, 224, 225]
+                return self.evaluationFunction(state) 
             
-            # Obtém as ações legais para o agente atual
+            # Obtém as ações possíveis para o agente atual
             legalActions = state.getLegalActions(agentIndex)
             
-            # Se não houver ações legais disponíveis em um estado não terminal (caso extremo)
+            # Caso extremo: se não houver movimentos legais (ex: encurralado), retorna a avaliação.
             if not legalActions:
-                return self.evaluationFunction(state) # [cite: 278]
+                return self.evaluationFunction(state) 
 
 
-            # 2. Gerenciamento de Agentes e Profundidade
+            # 2. GERENCIAMENTO DE AGENTES E PROFUNDIDADE
             numAgents = state.getNumAgents()
             
-            # Lógica para o próximo agente e a próxima profundidade
-            if agentIndex == (numAgents - 1): # Se for o último fantasma (fim de uma 'ply') [cite: 229, 230, 231, 235]
-                nextAgent = self.index # Próximo é o Pac-Man (agente 0) [cite: 231]
-                nextDepth = depth + 1  # A profundidade aumenta [cite: 234]
-            else: # Se for o Pac-Man ou um fantasma intermediário [cite: 232]
-                nextAgent = agentIndex + 1 # Próximo agente na sequência
-                nextDepth = depth          # A profundidade se mantém
+            # A profundidade só avança quando todos os agentes tiveram sua vez.
+            if agentIndex == (numAgents - 1): # É o último fantasma? (Fim de uma rodada completa)
+                nextAgent = self.index       # O próximo a jogar é o Pac-Man (Agente 0).
+                nextDepth = depth + 1        # Incrementa o nível de profundidade.
+            else: 
+                nextAgent = agentIndex + 1   # Passa para o próximo agente (Fantasma seguinte).
+                nextDepth = depth            # A profundidade permanece a mesma.
 
 
-            # 3. Lógica de Maximização (Pac-Man: agentIndex == 0)
-            if agentIndex == self.index: # self.index é sempre 0 (Pac-Man) [cite: 272]
+            # 3. LÓGICA DE MAXIMIZAÇÃO (Turno do Pac-Man: agentIndex == 0)
+            if agentIndex == self.index: # O Pac-Man (Agente Max) busca a melhor pontuação.
                 
-                # Inicializa o valor máximo com -infinito [cite: 238]
+                # Inicializa a melhor pontuação encontrada (Max Value) com -infinito
                 max_value = -float('inf') 
                 
-                # Para o nível mais externo (top-level call), rastreamos a melhor ação
-                best_action = Directions.STOP # Inicializa a melhor ação [cite: 239]
+                # Apenas o nó raiz (depth=0) precisa armazenar a ação que levou ao melhor score.
+                if depth == 0:
+                    best_action = Directions.STOP # Inicializa a melhor ação (pode ser qualquer valor válido)
                 
-                # Itera sobre todas as ações possíveis [cite: 240]
+                # Itera sobre as ações e chama a recursão para os sucessores
                 for action in legalActions:
-                    # Gera o estado sucessor [cite: 242]
                     successor = state.generateSuccessor(agentIndex, action)
-                    
-                    # Chamada recursiva para obter o score [cite: 243, 244]
                     score = minimax(successor, nextAgent, nextDepth)
                     
-                    # Se o score for melhor, atualiza o valor máximo e a ação [cite: 245]
+                    # Atualiza a melhor pontuação e a ação correspondente
                     if score > max_value:
                         max_value = score
-                        best_action = action 
+                        # Se estiver no nó raiz, guarda a ação
+                        if depth == 0:
+                            best_action = action 
                 
-                # Se for a chamada inicial (depth == 0), retorna a melhor AÇÃO
-                if depth == 0: # [cite: 246, 247]
-                    return best_action
-                # Se for uma chamada recursiva, retorna apenas o VALOR
-                else: # 
-                    return max_value
+                # Retorna a AÇÃO (se for o nó raiz) ou o VALOR (para chamadas recursivas internas)
+                return best_action if depth == 0 else max_value
 
-            # 4. Lógica de Minimização (Fantasmas: agentIndex > 0)
-            else: # Fantasma: jogador minimizador [cite: 193, 249]
+            # 4. LÓGICA DE MINIMIZAÇÃO (Turno dos Fantasmas: agentIndex > 0)
+            else: # O Fantasma (Agente Min) busca a pior pontuação para o Pac-Man.
                 
-                # Inicializa o valor mínimo com +infinito [cite: 250]
+                # Inicializa o pior score para o Pac-Man (Min Value) com +infinito
                 min_value = float('inf')
 
-                # Itera sobre todas as ações possíveis [cite: 251, 252]
+                # Itera sobre todas as ações do fantasma para encontrar o pior cenário
                 for action in legalActions:
-                    # Gera o estado sucessor [cite: 253]
                     successor = state.generateSuccessor(agentIndex, action)
-                    
-                    # Chamada recursiva para obter o score [cite: 254, 255]
                     score = minimax(successor, nextAgent, nextDepth)
                     
-                    # Se o score for pior para o Pac-Man, atualiza o valor mínimo [cite: 256]
+                    # Encontra o score mínimo
                     if score < min_value:
                         min_value = score
                         
-                # Retorna apenas o valor (score) [cite: 257]
+                # Retorna o valor mínimo (o pior que o Pac-Man pode esperar deste nó)
                 return min_value
 
-        # Chamada inicial: Pac-Man (self.index/0), profundidade 0.
-        # A função getAction deve retornar o valor que for a AÇÃO
-        # (graças ao "if depth == 0: return best_action" dentro de minimax).
-        return minimax(gameState, self.index, 0) # [cite: 246, 272]
+        # Inicia a busca Minimax a partir do estado atual (Agente 0, Profundidade 0)
+        return minimax(gameState, self.index, 0) 
 
 
 def betterEvaluationFunction(currentGameState: GameState):
-    # ... (A função betterEvaluationFunction já está implementada no seu arquivo e não precisa ser alterada)
+    # Esta é a função de avaliação padrão, que será substituída por sua versão
+    # otimizada para melhor desempenho (evitar o Pac-Man de parar).
     pos = currentGameState.getPacmanPosition()
     food = currentGameState.getFood().asList()
     ghostStates = currentGameState.getGhostStates()
@@ -114,7 +106,7 @@ def betterEvaluationFunction(currentGameState: GameState):
     ghostDistances = [manhattanDistance(pos, ghost.getPosition()) for ghost in ghostStates]
     minGhostDistance = min(ghostDistances)
 
-    # Aumenta a pontuação se o fantasma estiver assustado, mas penaliza se estiver muito perto
+    # Lógica para Fantasmas Assustados: Ignora a distância se o fantasma estiver assustado.
     scaredTimes = [ghostState.scaredTimer for ghostState in ghostStates]
     if min(scaredTimes) > 0:
         minGhostDistance = 0  # Ignora fantasmas assustados

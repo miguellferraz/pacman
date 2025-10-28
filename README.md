@@ -11,7 +11,7 @@ O objetivo principal é demonstrar a compreensão dos conceitos de maximização
 * **Miguel Carneiro Lira Ferraz** | Matrícula: 22401150
 * **Rafael Pinatto Lahr** | Matrícula: 22400897
 * **Samuel Pereira Lima** | Matrícula: 22402066
-* **Lucas Vilas Boas** | Matrícula: 2240
+* **Lucas Vilas Boas** | Matrícula: 22401592
 
 ---
 
